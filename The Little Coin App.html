@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///Users/ollirose/Downloads/thelittlecoinapp_3.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Little Coin App</title>
+<link rel="stylesheet" href="./The Little Coin App_files/tabler-icons.min.css">
+<script src="./The Little Coin App_files/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b2e;--navy2:#112240;--navy3:#1a2f4e;--navy4:#1e3a5f;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#f0d98a;
+  --silver:#a8b8c8;--text:#f0f4f8;--text2:#a8b8c8;--text3:#6b7f92;
+  --danger:#e05252;--success:#4caf7d;--warning:#e8a44a;
+  --border:rgba(201,168,76,0.2);--card:rgba(255,255,255,0.05);
+  --radius:12px;--rsm:8px;--rlg:16px;
+}
+html,body{height:100%;background:var(--navy);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;overflow:hidden}
+.app{display:flex;height:100vh;max-width:480px;margin:0 auto;flex-direction:column;position:relative;background:var(--navy);overflow:hidden}
+.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,0.2) transparent}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{width:3px}
+.screen::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:2px}
+.tbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.tbar h1{font-size:17px;font-weight:600;flex:1}
+.logo{font-size:15px;font-weight:700;color:var(--gold);letter-spacing:-.5px;line-height:1}
+.logo small{color:var(--text3);font-weight:300;font-size:10px;display:block;letter-spacing:.4px;margin-top:1px}
+.bnav{position:absolute;bottom:0;left:0;right:0;background:var(--navy2);border-top:1px solid var(--border);display:none;z-index:100;height:72px}
+.bnav.show{display:flex}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;gap:3px;cursor:pointer;color:var(--text3);font-size:10px;border:none;background:none;font-family:inherit;transition:.15s}
+.ni.active{color:var(--gold)}
+.ni i{font-size:20px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;border-radius:var(--rsm);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;border:none;font-family:inherit;text-decoration:none;white-space:nowrap}
+.btn-gold{background:var(--gold);color:var(--navy);font-weight:600}
+.btn-gold:hover{background:var(--gold2)}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-outline:hover{background:rgba(201,168,76,0.1)}
+.btn-ghost{background:var(--card);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,0.08)}
+.btn-danger{background:rgba(224,82,82,0.15);color:var(--danger);border:1px solid rgba(224,82,82,0.3)}
+.btn-sm{padding:6px 11px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.stat-card{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.sv{font-size:22px;font-weight:700;color:var(--gold);display:block}
+.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.sec{padding:16px}
+.sec-title{font-size:15px;font-weight:600;color:var(--gold);margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}
+.sec-title a{font-size:11px;color:var(--text3);cursor:pointer;font-weight:400}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:6px;display:block}
+.div{height:1px;background:var(--border);margin:14px 0}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.bg{background:rgba(201,168,76,0.2);color:var(--gold2)}
+.bs{background:rgba(76,175,125,0.2);color:var(--success)}
+.bt{background:rgba(232,164,74,0.2);color:var(--warning)}
+.bk{background:rgba(168,184,200,0.12);color:var(--silver)}
+.bw{background:rgba(224,82,82,0.15);color:var(--danger)}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:var(--navy3);color:var(--text3);border:1px solid var(--border)}
+input,select,textarea{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:var(--rsm);color:var(--text);padding:9px 11px;font-size:13px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.12)}
+select option{background:var(--navy2)}
+label,.lbl{font-size:12px;color:var(--text3);display:block;margin-bottom:5px;margin-top:12px}
+label:first-child,.lbl:first-child{margin-top:0}
+.av{width:38px;height:38px;border-radius:50%;background:var(--navy3);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--gold);flex-shrink:0}
+.av-sm{width:28px;height:28px;font-size:10px}
+.pb{height:5px;background:var(--navy3);border-radius:3px;overflow:hidden}
+.pf{height:100%;background:var(--gold);border-radius:3px;transition:.4s}
+.disc{background:rgba(232,164,74,0.08);border:1px solid rgba(232,164,74,0.25);border-radius:var(--rsm);padding:11px;font-size:11px;color:var(--text3);line-height:1.5}
+.ai-box{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius);padding:13px}
+.ccoin{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:.15s}
+.ccoin:hover{border-color:var(--gold);transform:translateY(-2px)}
+.cface{aspect-ratio:1;background:var(--navy3);display:flex;align-items:center;justify-content:center;font-size:36px;border-bottom:1px solid var(--border)}
+.cbody{padding:10px}
+.filt{display:flex;gap:7px;overflow-x:auto;padding:0 16px 11px;scrollbar-width:none}
+.filt::-webkit-scrollbar{display:none}
+.fc{flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:var(--card);cursor:pointer;color:var(--text2);white-space:nowrap;transition:.15s}
+.fc.on{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold)}
+.sbar{display:flex;align-items:center;gap:8px;background:var(--navy3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 12px;margin:14px 16px}
+.sbar i{color:var(--text3);font-size:18px;flex-shrink:0}
+.sbar input{background:none;border:none;padding:0;font-size:13px;width:100%}
+.sbar input:focus{outline:none;box-shadow:none}
+.tabs{display:flex;gap:3px;background:var(--navy3);padding:3px;border-radius:var(--rsm);margin-bottom:14px}
+.tab{flex:1;padding:7px;text-align:center;font-size:12px;border-radius:6px;cursor:pointer;color:var(--text3);border:none;background:none;font-family:inherit;transition:.15s}
+.tab.on{background:var(--gold);color:var(--navy);font-weight:600}
+.act-item{display:flex;align-items:flex-start;gap:9px;padding:11px 0;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.adot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:4px}
+.feed-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.feed-img{aspect-ratio:1.3;background:var(--navy3);display:flex;align-items:center;justify-content:center;font-size:52px}
+.feed-act{display:flex;gap:16px;padding:11px 14px;border-top:1px solid var(--border)}
+.fa{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);cursor:pointer}
+.fa:hover{color:var(--gold)}
+.mp{display:flex;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s}
+.mp:hover{background:rgba(255,255,255,.03)}
+.msg-thread{display:flex;flex-direction:column;gap:8px;padding:14px}
+.mb{padding:10px 13px;border-radius:var(--radius);max-width:80%;font-size:13px;line-height:1.4}
+.mb.mine{background:var(--gold);color:var(--navy);align-self:flex-end;border-bottom-right-radius:4px}
+.mb.theirs{background:var(--navy3);color:var(--text);border-bottom-left-radius:4px}
+.ph-hero{background:var(--navy3);padding:24px 16px;text-align:center;border-bottom:1px solid var(--border)}
+.ph-av{width:76px;height:76px;border-radius:50%;background:var(--navy4);border:3px solid var(--gold);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--gold)}
+.vb{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.3);border-radius:20px;font-size:11px;color:var(--success)}
+.stars{color:var(--gold)}
+.rev-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:10px}
+.trow{display:flex;align-items:center;gap:8px;background:var(--navy3);border-radius:var(--rsm);padding:11px}
+.oc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);padding:10px;text-align:center}
+.oswap{width:28px;height:28px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--navy)}
+.match-c{background:rgba(76,175,125,0.06);border:1px solid rgba(76,175,125,0.25);border-radius:var(--radius);padding:11px;margin-bottom:8px}
+.poss{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:rgba(76,175,125,0.1);border:1px solid rgba(76,175,125,0.2);border-radius:20px;font-size:12px;color:var(--success)}
+.admin-t{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.admin-t th{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);color:var(--text3);font-weight:500}
+.admin-t td{padding:9px 11px;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-word}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.sdot.g{background:var(--success)}.sdot.w{background:var(--warning)}.sdot.d{background:var(--danger)}
+.price-c{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.price-c.feat{border-color:var(--gold);position:relative}
+.price{font-size:26px;font-weight:700;color:var(--gold)}
+.ck-list{list-style:none;margin-top:10px}
+.ck-list li{display:flex;align-items:center;gap:7px;font-size:12px;padding:4px 0;color:var(--text2)}
+.ck-list li i{color:var(--success);font-size:13px;flex-shrink:0}
+.gap-c{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:13px;display:flex;gap:11px;align-items:flex-start}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:var(--rlg) var(--rlg) 0 0;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.fab{position:fixed;bottom:88px;right:calc(50% - 224px);width:52px;height:52px;border-radius:50%;background:var(--gold);border:none;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:90;font-size:22px;color:var(--navy)}
+.fab.show{display:flex}
+
+/* Auth-specific */
+.auth-error{background:rgba(224,82,82,0.1);border:1px solid rgba(224,82,82,0.3);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--danger);margin-bottom:12px;display:none}
+.auth-success{background:rgba(76,175,125,0.1);border:1px solid rgba(76,175,125,0.3);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--success);margin-bottom:12px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(13,27,46,0.3);border-top-color:var(--navy);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Verify email screen */
+.verify-wrap{padding:60px 24px;text-align:center}
+.verify-icon{font-size:48px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ═══ LANDING ═══ -->
+<div class="screen active" id="s-landing" style="padding-bottom:0">
+  <div style="padding:18px 16px 0;display:flex;justify-content:space-between;align-items:center">
+    <div class="logo">The Little Coin App<small>Collect. Track. Trade. Discover.</small></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn btn-ghost btn-sm" onclick="go(&#39;login&#39;)">Sign in</button>
+      <button class="btn btn-gold btn-sm" onclick="go(&#39;register&#39;)">Join beta</button>
+    </div>
+  </div>
+  <div style="padding:36px 16px 28px;text-align:center">
+    <div style="display:inline-block;padding:4px 12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:20px;font-size:11px;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Now in beta</div>
+    <h1 style="font-size:26px;font-weight:800;line-height:1.2;margin-bottom:11px;letter-spacing:-.5px">The modern marketplace for coin collectors</h1>
+    <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:22px">Catalogue your collection, showcase your coins, trade with trusted collectors, and track your portfolio.</p>
+    <button class="btn btn-gold" style="font-size:15px;padding:13px 26px" onclick="go(&#39;register&#39;)">Join the beta <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    <div style="display:inline-block;margin-top:18px;padding:8px 16px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:20px;font-size:11px;color:var(--text3)">
+      🚀 Early beta — be one of the first collectors on the platform
+    </div>
+  </div>
+  <div class="div"></div>
+  <div class="sec" style="padding-top:16px">
+    <span class="eyebrow">Features</span>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:14px">Everything a collector needs</h2>
+    <div class="g2" style="margin-bottom:14px">
+      <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:14px"><div style="font-size:22px;margin-bottom:8px">🤖</div><div style="font-size:13px;font-weight:600;margin-bottom:3px">AI coin ID</div><div style="font-size:11px;color:var(--text3)">Upload a photo, get instant identification</div></div>
+      <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:14px"><div style="font-size:22px;margin-bottom:8px">📊</div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Portfolio tracker</div><div style="font-size:11px;color:var(--text3)">Track estimated value across your collection</div></div>
+      <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:14px"><div style="font-size:22px;margin-bottom:8px">🤝</div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Trade &amp; sell</div><div style="font-size:11px;color:var(--text3)">Structured offers with collector verification</div></div>
+      <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);padding:14px"><div style="font-size:22px;margin-bottom:8px">❤️</div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Wish lists</div><div style="font-size:11px;color:var(--text3)">Matched when someone lists your wanted coin</div></div>
+    </div>
+  </div>
+  <div class="sec" style="padding-top:0">
+    <span class="eyebrow">The gap</span>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:12px">Why collectors need The Little Coin App</h2>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="gap-c"><div style="font-size:18px">📚</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Old catalogues feel outdated</div><div style="font-size:11px;color:var(--text3)">Static spreadsheets. No community, no market.</div></div></div>
+      <div class="gap-c"><div style="font-size:18px">📘</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Facebook groups are fragmented</div><div style="font-size:11px;color:var(--text3)">No structured listings, no verification, no history.</div></div></div>
+      <div class="gap-c"><div style="font-size:18px">🛒</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">eBay is noisy and seller-first</div><div style="font-size:11px;color:var(--text3)">No collector profiles, no trade offers, no community.</div></div></div>
+      <div class="gap-c"><div style="font-size:18px">🔒</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Trust is missing everywhere</div><div style="font-size:11px;color:var(--text3)">No proof of possession, no collector reputation.</div></div></div>
+    </div>
+  </div>
+  <div class="sec" style="padding-top:8px">
+    <span class="eyebrow">Pricing</span>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:14px">Simple, fair pricing</h2>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="price-c"><div style="font-size:13px;font-weight:600;margin-bottom:4px">Free</div><div class="price">£0<span style="font-size:13px;font-weight:400;color:var(--text3)">/mo</span></div><ul class="ck-list"><li><i class="ti ti-check" aria-hidden="true"></i>Up to 50 coins</li><li><i class="ti ti-check" aria-hidden="true"></i>Basic AI identification</li><li><i class="ti ti-check" aria-hidden="true"></i>Public profile</li><li><i class="ti ti-check" aria-hidden="true"></i>Marketplace browsing</li></ul></div>
+      <div class="price-c feat"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:3px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Most popular</div><div style="font-size:13px;font-weight:600;margin-bottom:4px">Collector Pro</div><div class="price">£4.99<span style="font-size:13px;font-weight:400;color:var(--text3)">/mo</span></div><ul class="ck-list"><li><i class="ti ti-check" aria-hidden="true"></i>Unlimited coins</li><li><i class="ti ti-check" aria-hidden="true"></i>Advanced AI + bulk ID</li><li><i class="ti ti-check" aria-hidden="true"></i>Wish list matching alerts</li><li><i class="ti ti-check" aria-hidden="true"></i>Portfolio analytics</li><li><i class="ti ti-check" aria-hidden="true"></i>Priority support</li></ul></div>
+      <div class="price-c"><div style="font-size:13px;font-weight:600;margin-bottom:4px">Dealer</div><div class="price">£29.99<span style="font-size:13px;font-weight:400;color:var(--text3)">/mo</span></div><ul class="ck-list"><li><i class="ti ti-check" aria-hidden="true"></i>All Pro features</li><li><i class="ti ti-check" aria-hidden="true"></i>Dealer badge &amp; storefront</li><li><i class="ti ti-check" aria-hidden="true"></i>Bulk upload tools</li><li><i class="ti ti-check" aria-hidden="true"></i>Featured marketplace slots</li></ul></div>
+    </div>
+  </div>
+  <div style="text-align:center;padding:28px 16px 24px;border-top:1px solid var(--border);margin-top:16px">
+    <div class="logo" style="font-size:20px;display:inline-block">The Little Coin App<small style="display:block">Collect. Track. Trade. Discover.</small></div>
+    <p style="font-size:11px;color:var(--text3);margin-top:8px">Beta · © 2026 The Little Coin App</p>
+  </div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="screen" id="s-login" style="padding-bottom:20px">
+  <div style="padding:40px 20px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div class="logo" style="font-size:22px;display:inline-block">The Little Coin App</div>
+      <p style="color:var(--text3);font-size:13px;margin-top:6px">Sign in to your collection</p>
+    </div>
+    <div class="card">
+      <div id="login-error" class="auth-error"></div>
+      <div><label>Email address</label><input type="email" id="login-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" style="margin-bottom:14px"></div>
+      <button class="btn btn-gold" id="login-btn" style="width:100%;justify-content:center;font-size:14px" onclick="doLogin()">Sign in</button>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text3)">Forgot password? <a style="color:var(--gold);cursor:pointer" onclick="doReset()">Reset</a></div>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)">Don't have an account? <a style="color:var(--gold);cursor:pointer" onclick="go(&#39;register&#39;)">Create one</a></div>
+    <div style="text-align:center;margin-top:20px"><button class="btn btn-ghost btn-sm" onclick="go(&#39;landing&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to The Little Coin App</button></div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div class="screen" id="s-register" style="padding-bottom:20px">
+  <div style="padding:30px 20px">
+    <div style="text-align:center;margin-bottom:22px">
+      <div class="logo" style="font-size:22px;display:inline-block">The Little Coin App</div>
+      <p style="color:var(--text3);font-size:13px;margin-top:6px">Create your collector profile</p>
+    </div>
+    <div class="card">
+      <div id="register-error" class="auth-error"></div>
+      <div><label>Username</label><input type="text" id="reg-username" placeholder="e.g. CoinHunterGB" autocomplete="username"></div>
+      <div><label>Email address</label><input type="email" id="reg-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div><label>Password</label><input type="password" id="reg-password" placeholder="8+ characters" autocomplete="new-password"></div>
+      <div><label>Account type</label><select id="reg-type"><option value="collector">Collector</option><option value="dealer">Dealer</option><option value="both">Both</option></select></div>
+      <div style="margin-bottom:14px"><label>Location (optional)</label><input type="text" id="reg-location" placeholder="e.g. London, UK"></div>
+      <button class="btn btn-gold" id="register-btn" style="width:100%;justify-content:center;font-size:14px" onclick="doRegister()">Create account <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.4">By joining you agree to our Terms of Service and Privacy Policy.</p>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)">Already a member? <a style="color:var(--gold);cursor:pointer" onclick="go(&#39;login&#39;)">Sign in</a></div>
+  </div>
+</div>
+
+<!-- ═══ VERIFY EMAIL ═══ -->
+<div class="screen" id="s-verify" style="padding-bottom:20px">
+  <div class="verify-wrap">
+    <div class="verify-icon">📬</div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:10px">Check your email</h2>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px">We've sent a confirmation link to <strong id="verify-email-display" style="color:var(--gold)"></strong>. Click it to activate your account.</p>
+    <div class="disc" style="text-align:left;margin-bottom:24px">Can't see it? Check your spam folder. The link expires after 24 hours.</div>
+    <button class="btn btn-ghost btn-sm" onclick="go(&#39;login&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to sign in</button>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="screen" id="s-dashboard">
+  <div class="tbar"><div class="logo">The Little Coin App</div><div style="display:flex;gap:8px;margin-left:auto"><i class="ti ti-bell" style="font-size:20px;color:var(--text3);cursor:pointer" aria-hidden="true"></i><div class="av" style="cursor:pointer" onclick="go(&#39;profile&#39;)" id="dash-av">JH</div></div></div>
+  <div class="sec">
+    <div style="margin-bottom:14px"><p style="font-size:13px;color:var(--text3)">Good morning,</p><h2 style="font-size:19px;font-weight:700" id="dash-username">Collector <span class="badge bg" style="vertical-align:middle">Free</span></h2></div>
+    <div class="g2" style="margin-bottom:11px">
+      <div class="stat-card"><span class="sv" id="dash-coins">0</span><span class="sl">Total coins</span></div>
+      <div class="stat-card"><span class="sv" id="dash-value">£0</span><span class="sl">Est. value</span></div>
+    </div>
+    <div class="g3" style="margin-bottom:14px">
+      <div class="stat-card"><span class="sv" style="font-size:20px">0</span><span class="sl">For sale</span></div>
+      <div class="stat-card"><span class="sv" style="font-size:20px">0</span><span class="sl">Trading</span></div>
+      <div class="stat-card"><span class="sv" style="font-size:20px;color:var(--success)">0</span><span class="sl" style="color:var(--success)">Matches</span></div>
+    </div>
+    <div class="div"></div>
+    <div class="sec-title">Quick actions</div>
+    <div class="g2" style="margin-bottom:14px">
+      <button class="btn btn-gold" onclick="go(&#39;add-coin&#39;)" style="justify-content:center"><i class="ti ti-plus" aria-hidden="true"></i> Add coin</button>
+      <button class="btn btn-outline" onclick="go(&#39;marketplace&#39;)" style="justify-content:center"><i class="ti ti-building-store" aria-hidden="true"></i> Browse</button>
+    </div>
+    <div class="div"></div>
+    <div class="sec-title">Getting started</div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="gap-c" id="gs-add" style="cursor:pointer" onclick="go(&#39;add-coin&#39;)"><div style="font-size:18px">🪙</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Add your first coin</div><div style="font-size:11px;color:var(--text3)">Upload a photo and let AI identify it for you.</div></div><i class="ti ti-chevron-right" style="margin-left:auto;color:var(--text3)" aria-hidden="true"></i></div>
+      <div class="gap-c" style="cursor:pointer" onclick="go(&#39;wishlist&#39;)"><div style="font-size:18px">❤️</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Build your wish list</div><div style="font-size:11px;color:var(--text3)">Get notified when a collector lists your wanted coin.</div></div><i class="ti ti-chevron-right" style="margin-left:auto;color:var(--text3)" aria-hidden="true"></i></div>
+      <div class="gap-c" style="cursor:pointer" onclick="go(&#39;marketplace&#39;)"><div style="font-size:18px">🏛️</div><div><div style="font-size:13px;font-weight:600;margin-bottom:3px">Explore the marketplace</div><div style="font-size:11px;color:var(--text3)">Browse coins for sale from verified collectors.</div></div><i class="ti ti-chevron-right" style="margin-left:auto;color:var(--text3)" aria-hidden="true"></i></div>
+    </div>
+    <div class="div"></div>
+    <div style="text-align:center">
+      <button class="btn btn-danger btn-sm" onclick="doSignOut()"><i class="ti ti-logout" aria-hidden="true"></i> Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COLLECTION ═══ -->
+<div class="screen" id="s-collection">
+  <div class="tbar"><button class="btn btn-ghost btn-sm" onclick="go(&#39;dashboard&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><h1>My Collection</h1><span style="font-size:12px;color:var(--text3);margin-left:auto" id="coll-count">0 coins</span></div>
+  <div class="sbar"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Search your collection..." id="coll-search" oninput="renderCollection()"></div>
+  <div class="filt"><div class="fc on" onclick="filterCollection(this,&#39;all&#39;)">All</div><div class="fc" onclick="filterCollection(this,&#39;sale&#39;)">For sale</div><div class="fc" onclick="filterCollection(this,&#39;trade&#39;)">For trade</div><div class="fc" onclick="filterCollection(this,&#39;keep&#39;)">Keep</div></div>
+  <div id="coll-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px">
+    <div style="grid-column:span 2;text-align:center;padding:40px 0;color:var(--text3)">
+      <i class="ti ti-stack-2" style="font-size:36px;opacity:.3" aria-hidden="true"></i>
+      <p style="margin-top:10px;font-size:13px">Your collection is empty.</p>
+      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="go(&#39;add-coin&#39;)"><i class="ti ti-plus" aria-hidden="true"></i> Add your first coin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADD COIN ═══ -->
+<div class="screen" id="s-add-coin">
+  <div class="tbar"><button class="btn btn-ghost btn-sm" onclick="go(&#39;collection&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><h1>Add Coin</h1></div>
+  <div class="sec">
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:11px;color:var(--gold)"><i class="ti ti-camera" aria-hidden="true"></i> Upload photos</div>
+      <div class="g2">
+        <div id="ob-box" style="aspect-ratio:1;background:var(--navy3);border:1px dashed var(--border);border-radius:var(--rsm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);transition:.2s;overflow:hidden" onclick="document.getElementById(&#39;photo-upload&#39;).click()">
+          <i class="ti ti-photo-plus" style="font-size:26px;color:var(--gold)" aria-hidden="true"></i>Obverse
+        </div>
+        <div style="aspect-ratio:1;background:var(--navy3);border:1px dashed var(--border);border-radius:var(--rsm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3)">
+          <i class="ti ti-photo-plus" style="font-size:26px;color:var(--text3)" aria-hidden="true"></i>Reverse
+        </div>
+      </div>
+      <input type="file" id="photo-upload" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Tap obverse to upload a photo for AI identification</p>
+    </div>
+    <div id="ai-r" class="ai-box" style="display:none;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div><span style="font-size:11px;color:var(--text3)">🤖 AI suggestion</span><div id="ai-name" style="font-size:14px;font-weight:600;color:var(--gold);margin-top:2px">Identifying...</div><div id="ai-detail" style="font-size:11px;color:var(--text3);margin-top:2px"></div></div>
+        <div style="text-align:right"><span style="font-size:11px;color:var(--text3)">Confidence</span><div id="ai-conf" style="font-size:18px;font-weight:700;color:var(--success)">–</div></div>
+      </div>
+      <div class="pb" style="margin-bottom:10px"><div class="pf" id="ai-bar" style="width:0%"></div></div>
+      <div class="disc" style="margin-bottom:10px;font-size:11px">AI identification is indicative only. Please verify all details independently before listing.</div>
+      <div style="display:flex;gap:8px"><button class="btn btn-gold btn-sm" onclick="acceptAI()" style="flex:1;justify-content:center"><i class="ti ti-check" aria-hidden="true"></i> Accept</button><button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center" onclick="document.getElementById(&#39;ai-r&#39;).style.display=&#39;none&#39;">Dismiss</button></div>
+    </div>
+    <div><label>Coin name</label><input type="text" id="f-name" placeholder="e.g. British Sovereign"></div>
+    <div class="g2"><div><label>Country</label><input type="text" id="f-country" placeholder="GB"></div><div><label>Year</label><input type="number" id="f-year" placeholder="1912"></div></div>
+    <div><label>Denomination</label><input type="text" id="f-denom" placeholder="Sovereign / Crown / Penny..."></div>
+    <div class="g2"><div><label>Mint mark</label><input type="text" id="f-mint" placeholder="M, S, C..."></div><div><label>Metal</label><select id="f-metal"><option>Gold</option><option>Silver</option><option>Copper</option><option>Bronze</option><option>Nickel</option><option>Other</option></select></div></div>
+    <div><label>Grade / Condition</label><select id="f-grade"><option>Poor (P)</option><option>Fair (F)</option><option>Very Fine (VF)</option><option>Extremely Fine (EF)</option><option>Uncirculated (UNC)</option><option>Proof</option></select></div>
+    <div class="g2"><div><label>Est. value (£)</label><input type="number" id="f-value" placeholder="480"></div><div><label>Purchase price (£)</label><input type="number" id="f-purchase" placeholder="420"></div></div>
+    <div><label>Notes</label><textarea rows="2" id="f-notes" placeholder="Any details about condition, provenance..."></textarea></div>
+    <div style="margin-bottom:14px"><label>Status</label><select id="f-status"><option value="keep">Keep (private)</option><option value="sale">For sale</option><option value="trade">Open to trade</option></select></div>
+    <div id="add-coin-error" class="auth-error"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="go(&#39;collection&#39;)">Cancel</button>
+      <button class="btn btn-gold" id="save-coin-btn" style="flex:2;justify-content:center" onclick="saveCoin()">Add to collection <i class="ti ti-check" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COIN DETAIL ═══ -->
+<div class="screen" id="s-coin-detail">
+  <div class="tbar"><button class="btn btn-ghost btn-sm" onclick="go(&#39;collection&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><h1>Coin Detail</h1><div style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-ghost btn-sm" id="cd-delete" onclick="deleteCoin()"><i class="ti ti-trash" style="color:var(--danger)" aria-hidden="true"></i></button></div></div>
+  <div class="sec">
+    <div style="aspect-ratio:1;background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:64px;margin-bottom:14px" id="cd-image">🪙</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div><h2 style="font-size:20px;font-weight:700" id="cd-name">–</h2><p style="font-size:13px;color:var(--text3)" id="cd-sub">–</p></div>
+      <div style="text-align:right"><div style="font-size:22px;font-weight:700;color:var(--gold)" id="cd-value">–</div><div style="font-size:11px;color:var(--text3)">Est. value</div></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px" id="cd-tags"></div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:10px">Coin details</div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse" id="cd-table"></table>
+    </div>
+    <div class="disc">AI identification and valuation are indicative only. Verify authenticity and value independently before buying, selling, or trading.</div>
+  </div>
+</div>
+
+<!-- ═══ MARKETPLACE ═══ -->
+<div class="screen" id="s-marketplace">
+  <div class="tbar"><h1>Marketplace</h1><button class="btn btn-ghost btn-sm" style="margin-left:auto"><i class="ti ti-adjustments" aria-hidden="true"></i> Filter</button></div>
+  <div class="sbar"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Search coins for sale..."></div>
+  <div class="filt"><div class="fc on">All</div><div class="fc">British</div><div class="fc">Gold</div><div class="fc">Silver</div><div class="fc">Under £100</div><div class="fc">£100–£500</div><div class="fc">EF+</div><div class="fc">Verified</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px">
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">🏛️</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1887 Crown</div><div style="font-size:11px;color:var(--text3)">Victoria · Silver · EF</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£220</span><span style="font-size:11px;color:var(--text3)">⭐ 4.9</span></div></div></div>
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">🌟</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1936 Shilling</div><div style="font-size:11px;color:var(--text3)">Edward VIII · Silver · EF</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£340</span><span style="font-size:11px;color:var(--text3)">⭐ 4.7</span></div></div></div>
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">🪙</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1935 Crown</div><div style="font-size:11px;color:var(--text3)">Silver Jubilee · Silver</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£65</span><span style="font-size:11px;color:var(--text3)">⭐ 5.0</span></div></div></div>
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">🏅</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1907 Sovereign</div><div style="font-size:11px;color:var(--text3)">Edward VII · Gold · VF</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£510</span><span style="font-size:11px;color:var(--text3)">⭐ 5.0</span></div></div></div>
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">💎</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1966 Florin</div><div style="font-size:11px;color:var(--text3)">QEII · Silver · UNC</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£28</span><span style="font-size:11px;color:var(--text3)">⭐ 4.8</span></div></div></div>
+    <div class="ccoin" onclick="go(&#39;coin-detail&#39;)"><div class="cface">⚡</div><div class="cbody"><div style="font-size:13px;font-weight:600;margin-bottom:3px">1943 Threepence</div><div style="font-size:11px;color:var(--text3)">George VI · Nickel</div><div style="display:flex;justify-content:space-between;margin-top:7px"><span class="badge bs">£8</span><span style="font-size:11px;color:var(--text3)">⭐ 4.6</span></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ TRADE HUB ═══ -->
+<div class="screen" id="s-trade-hub">
+  <div class="tbar"><h1>Trade Hub</h1></div>
+  <div class="sec">
+    <div class="tabs" id="ttabs"><button class="tab on" onclick="stab(&#39;ttabs&#39;,0,[&#39;tt0&#39;,&#39;tt1&#39;,&#39;tt2&#39;])">Browse</button><button class="tab" onclick="stab(&#39;ttabs&#39;,1,[&#39;tt0&#39;,&#39;tt1&#39;,&#39;tt2&#39;])">My Offers</button><button class="tab" onclick="stab(&#39;ttabs&#39;,2,[&#39;tt0&#39;,&#39;tt1&#39;,&#39;tt2&#39;])">Matches</button></div>
+    <div id="tt0">
+      <div class="sec-title">Available for trade</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px">
+        <div class="ccoin" onclick="openModal(&#39;m-trade&#39;)"><div class="cface">🥈</div><div class="cbody"><div style="font-size:12px;font-weight:600;margin-bottom:2px">1925 Half Crown</div><div style="font-size:11px;color:var(--text3)">SilverFox_Cardiff</div><span class="badge bt" style="margin-top:5px">Trade · £85</span></div></div>
+        <div class="ccoin" onclick="openModal(&#39;m-trade&#39;)"><div class="cface">🌙</div><div class="cbody"><div style="font-size:12px;font-weight:600;margin-bottom:2px">1902 Sixpence</div><div style="font-size:11px;color:var(--text3)">NumismaticNick</div><span class="badge bt" style="margin-top:5px">Trade · £32</span></div></div>
+      </div>
+    </div>
+    <div id="tt1" style="display:none"><div class="disc">No active offers yet. Browse coins marked for trade to send your first offer.</div></div>
+    <div id="tt2" style="display:none"><div class="disc">No wish list matches yet. Add coins to your wish list and you'll be notified here when they're listed.</div></div>
+    <div class="div"></div>
+    <div class="card" style="display:flex;gap:10px;background:rgba(201,168,76,0.04)"><div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);font-size:16px"><i class="ti ti-shield" aria-hidden="true"></i></div><div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Safe trading tips</div><div style="font-size:12px;color:var(--text3);line-height:1.5">Always check seller reviews · Request proof of possession · Use tracked, insured shipping · Be cautious with high-value trades.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══ WISH LIST ═══ -->
+<div class="screen" id="s-wishlist">
+  <div class="tbar"><h1>Wish List</h1><button class="btn btn-gold btn-sm" style="margin-left:auto" onclick="openModal(&#39;m-wish&#39;)"><i class="ti ti-plus" aria-hidden="true"></i> Add</button></div>
+  <div class="sec">
+    <div id="wish-list-content">
+      <div class="disc">Your wish list is empty. Add coins you're looking for and you'll be matched automatically when a collector lists one.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FEED ═══ -->
+<div class="screen" id="s-feed">
+  <div class="tbar"><div class="logo">The Little Coin App</div><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="go(&#39;messages&#39;)"><i class="ti ti-message" style="font-size:18px" aria-hidden="true"></i></button></div>
+  <div class="filt" style="padding-top:12px"><div class="fc on">Following</div><div class="fc">Discover</div><div class="fc">Gold</div><div class="fc">Silver</div><div class="fc">British</div></div>
+  <div style="padding:4px 16px 0">
+    <div class="feed-card">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px"><div class="av">VV</div><div><div style="font-size:13px;font-weight:500">VictoriaVault</div><div style="font-size:11px;color:var(--text3)">2 hours ago · London, UK</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto">Follow</button></div>
+      <div class="feed-img"><span style="font-size:60px">🏛️</span></div>
+      <div style="padding:12px 14px"><div style="font-size:14px;font-weight:600;margin-bottom:4px">Just added: 1887 Victoria Crown</div><p style="font-size:12px;color:var(--text2);line-height:1.5">One of my favourite Jubilee pieces. Exceptional surfaces, original lustre. EF condition. Graded by PCGS.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px"><span class="tag">Victoria</span><span class="tag">Crown</span><span class="tag">1887</span><span class="tag">Silver</span></div></div>
+      <div class="feed-act"><div class="fa"><i class="ti ti-heart" style="font-size:16px" aria-hidden="true"></i> 24</div><div class="fa"><i class="ti ti-message" style="font-size:16px" aria-hidden="true"></i> 5</div><div class="fa"><i class="ti ti-bookmark" style="font-size:16px" aria-hidden="true"></i> Save</div></div>
+    </div>
+    <div class="feed-card">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px"><div class="av">NN</div><div><div style="font-size:13px;font-weight:500">NumismaticNick</div><div style="font-size:11px;color:var(--text3)">Yesterday · Manchester</div></div><span class="badge bg" style="margin-left:auto">Pro</span></div>
+      <div class="feed-img" style="background:var(--navy4)"><span style="font-size:60px">🪙</span></div>
+      <div style="padding:12px 14px"><div style="font-size:14px;font-weight:600;margin-bottom:4px">New addition: 1933 Penny — grail achieved!</div><p style="font-size:12px;color:var(--text2);line-height:1.5">After 4 years of searching, it finally happened. One of only 7 known examples. EF. I genuinely can't believe it's real. 🏆</p></div>
+      <div class="feed-act"><div class="fa"><i class="ti ti-heart" style="font-size:16px" aria-hidden="true"></i> 112</div><div class="fa"><i class="ti ti-message" style="font-size:16px" aria-hidden="true"></i> 31</div><div class="fa"><i class="ti ti-bookmark" style="font-size:16px" aria-hidden="true"></i> Save</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MESSAGES ═══ -->
+<div class="screen" id="s-messages">
+  <div class="tbar"><h1>Messages</h1></div>
+  <div class="sbar"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Search conversations..."></div>
+  <div id="inbox">
+    <div class="mp" onclick="openThread()"><div class="av">SF</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">SilverFox_Cardiff</span><span style="font-size:11px;color:var(--text3)">2h ago</span></div><div style="font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Re: trade offer for 1925 Half Crown...</div></div><div style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px"></div></div>
+  </div>
+  <div id="thread" style="display:none">
+    <div class="tbar"><button class="btn btn-ghost btn-sm" onclick="closeThread()"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><div class="av av-sm" style="margin-left:4px">SF</div><div style="margin-left:8px"><div style="font-size:14px;font-weight:600">SilverFox_Cardiff</div><div style="font-size:11px;color:var(--success)">● Active now</div></div></div>
+    <div class="msg-thread">
+      <div style="align-self:flex-start;display:flex;gap:8px;align-items:flex-end"><div class="av av-sm">SF</div><div class="mb theirs">Hey! I sent over a trade offer for your 1912 Sovereign. Hope it's fair!</div></div>
+      <div class="mb mine">Thanks, I saw it! The value gap is quite wide though. Would you add some cash?</div>
+      <div style="align-self:flex-start;display:flex;gap:8px;align-items:flex-end"><div class="av av-sm">SF</div><div class="mb theirs">Absolutely, how does £350 cash + the Crown sound?</div></div>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+      <input type="text" placeholder="Type a message..." style="flex:1;border-radius:20px;padding:9px 14px">
+      <button class="btn btn-gold" style="border-radius:50%;width:40px;height:40px;padding:0;justify-content:center;flex-shrink:0"><i class="ti ti-send" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div class="screen" id="s-profile">
+  <div class="tbar"><button class="btn btn-ghost btn-sm" onclick="go(&#39;dashboard&#39;)"><i class="ti ti-arrow-left" aria-hidden="true"></i></button><h1>Profile</h1></div>
+  <div class="ph-hero">
+    <div class="ph-av" id="profile-av">JH</div>
+    <h2 style="font-size:20px;font-weight:700" id="profile-username">–</h2>
+    <p style="font-size:12px;color:var(--text3);margin-top:3px" id="profile-location">–</p>
+    <div style="display:flex;justify-content:center;gap:6px;margin-top:8px"><span class="badge bg">Collector</span></div>
+    <div style="display:flex;justify-content:center;gap:26px;margin-top:14px">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--gold)" id="profile-coins">0</div><div style="font-size:11px;color:var(--text3)">Coins</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--gold)">0</div><div style="font-size:11px;color:var(--text3)">Trades</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--gold)">0</div><div style="font-size:11px;color:var(--text3)">Followers</div></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="tabs" id="ptabs"><button class="tab on" onclick="stab(&#39;ptabs&#39;,0,[&#39;pt0&#39;,&#39;pt1&#39;])">Collection</button><button class="tab" onclick="stab(&#39;ptabs&#39;,1,[&#39;pt0&#39;,&#39;pt1&#39;])">For sale</button></div>
+    <div id="pt0"><div id="profile-coll-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:11px"></div></div>
+    <div id="pt1" style="display:none"><div class="disc">No coins listed for sale yet.</div></div>
+    <div class="div"></div>
+    <div style="text-align:center">
+      <button class="btn btn-danger btn-sm" onclick="doSignOut()"><i class="ti ti-logout" aria-hidden="true"></i> Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="bnav" id="bnav">
+  <button class="ni" id="ni-dashboard" onclick="go(&#39;dashboard&#39;)"><i class="ti ti-home" aria-hidden="true"></i>Home</button>
+  <button class="ni" id="ni-collection" onclick="go(&#39;collection&#39;)"><i class="ti ti-stack-2" aria-hidden="true"></i>Collection</button>
+  <button class="ni" id="ni-marketplace" onclick="go(&#39;marketplace&#39;)"><i class="ti ti-building-store" aria-hidden="true"></i>Market</button>
+  <button class="ni" id="ni-feed" onclick="go(&#39;feed&#39;)"><i class="ti ti-news" aria-hidden="true"></i>Feed</button>
+  <button class="ni" id="ni-profile" onclick="go(&#39;profile&#39;)"><i class="ti ti-user-circle" aria-hidden="true"></i>Profile</button>
+</nav>
+
+<button class="fab" id="fab" onclick="go(&#39;add-coin&#39;)"><i class="ti ti-plus" aria-hidden="true"></i></button>
+
+<!-- ═══ TRADE OFFER MODAL ═══ -->
+<div id="m-trade" class="modal-bg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:14px;color:var(--gold)"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Send Trade Offer</div>
+    <div><label>You offer</label><select style="margin-bottom:12px"><option>Select a coin from your collection</option></select></div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px">In exchange for</div>
+    <div class="card" style="margin-bottom:12px;background:rgba(201,168,76,0.04)"><div style="font-size:14px;font-weight:600;margin-bottom:3px">1925 Half Crown</div><div style="font-size:12px;color:var(--text3)">SilverFox_Cardiff · £85 · EF</div></div>
+    <div><label>Cash adjustment (optional)</label><input type="number" placeholder="e.g. 50 — negative if they pay you"></div>
+    <div><label>Message</label><textarea rows="2" placeholder="Introduce yourself and explain your offer..." style="margin-bottom:12px"></textarea></div>
+    <div class="disc" style="margin-bottom:14px">Always check the seller's reviews and request proof of possession photos before committing to a high-value trade.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal(&#39;m-trade&#39;)">Cancel</button>
+      <button class="btn btn-gold" style="flex:2;justify-content:center" onclick="closeModal(&#39;m-trade&#39;)">Send offer <i class="ti ti-send" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WISH LIST MODAL ═══ -->
+<div id="m-wish" class="modal-bg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:14px;color:var(--gold)">Add to Wish List</div>
+    <div><label>Coin name</label><input type="text" id="w-name" placeholder="e.g. 1819 Crown"></div>
+    <div><label>Country</label><input type="text" id="w-country" placeholder="e.g. GB"></div>
+    <div><label>Year (approx)</label><input type="number" id="w-year" placeholder="1819"></div>
+    <div><label>Max budget (£)</label><input type="number" id="w-budget" placeholder="350"></div>
+    <div style="margin-bottom:14px"><label>Preferred grade</label><select id="w-grade"><option>Any</option><option>VF or better</option><option>EF or better</option><option>UNC</option></select></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal(&#39;m-wish&#39;)">Cancel</button>
+      <button class="btn btn-gold" style="flex:2;justify-content:center" onclick="saveWishItem()">Add to wish list</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .app -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURATION — Replace with your Supabase credentials
+// ═══════════════════════════════════════════════════════
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+// Set to true once you've added your Supabase credentials above
+const SUPABASE_CONFIGURED = (SUPABASE_URL !== 'YOUR_SUPABASE_URL');
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE INIT
+// ═══════════════════════════════════════════════════════
+let supabase = null;
+let currentUser = null;
+let userCoins = [];
+let currentCoinIndex = null;
+let wishList = [];
+
+if (SUPABASE_CONFIGURED) {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  initAuth();
+} else {
+  // Demo mode — no Supabase connected yet
+  console.log('The Little Coin App: Running in demo mode. Add Supabase credentials to enable real auth.');
+}
+
+async function initAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadUserData();
+    go('dashboard');
+  }
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+      await loadUserData();
+      go('dashboard');
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      userCoins = [];
+      go('landing');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTH FUNCTIONS
+// ═══════════════════════════════════════════════════════
+async function doLogin() {
+  if (!SUPABASE_CONFIGURED) { go('dashboard'); return; }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!email || !password) { showError(err, 'Please enter your email and password.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  btn.disabled = false;
+  btn.innerHTML = 'Sign in';
+  if (error) showError(err, error.message);
+}
+
+async function doRegister() {
+  if (!SUPABASE_CONFIGURED) { go('dashboard'); return; }
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const location = document.getElementById('reg-location').value.trim();
+  const accountType = document.getElementById('reg-type').value;
+  const btn = document.getElementById('register-btn');
+  const err = document.getElementById('register-error');
+  err.style.display = 'none';
+  if (!username || !email || !password) { showError(err, 'Please fill in all required fields.'); return; }
+  if (password.length < 8) { showError(err, 'Password must be at least 8 characters.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creating account...';
+  const { data, error } = await supabase.auth.signUp({
+    email, password,
+    options: { data: { username, location, account_type: accountType } }
+  });
+  btn.disabled = false;
+  btn.innerHTML = 'Create account <i class="ti ti-arrow-right"></i>';
+  if (error) { showError(err, error.message); return; }
+  if (data.user && !data.session) {
+    document.getElementById('verify-email-display').textContent = email;
+    go('verify');
+  }
+}
+
+async function doReset() {
+  const email = document.getElementById('login-email').value.trim();
+  const err = document.getElementById('login-error');
+  if (!email) { showError(err, 'Enter your email address above first.'); return; }
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  if (error) { showError(err, error.message); return; }
+  err.style.background = 'rgba(76,175,125,0.1)';
+  err.style.borderColor = 'rgba(76,175,125,0.3)';
+  err.style.color = 'var(--success)';
+  err.style.display = 'block';
+  err.textContent = 'Reset link sent — check your email.';
+}
+
+async function doSignOut() {
+  if (SUPABASE_CONFIGURED) await supabase.auth.signOut();
+  currentUser = null;
+  userCoins = [];
+  wishList = [];
+  go('landing');
+}
+
+function showError(el, msg) {
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = 'rgba(224,82,82,0.1)';
+  el.style.borderColor = 'rgba(224,82,82,0.3)';
+  el.style.color = 'var(--danger)';
+}
+
+// ═══════════════════════════════════════════════════════
+// DATA FUNCTIONS
+// ═══════════════════════════════════════════════════════
+async function loadUserData() {
+  if (!SUPABASE_CONFIGURED || !currentUser) return;
+  const { data } = await supabase
+    .from('coins')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  userCoins = data || [];
+  updateDashboard();
+  renderCollection();
+  renderProfile();
+}
+
+function updateDashboard() {
+  const meta = currentUser?.user_metadata || {};
+  const username = meta.username || currentUser?.email?.split('@')[0] || 'Collector';
+  const initials = username.slice(0,2).toUpperCase();
+  document.getElementById('dash-username').innerHTML = username + ' <span class="badge bg" style="vertical-align:middle">Free</span>';
+  document.getElementById('dash-av').textContent = initials;
+  document.getElementById('dash-coins').textContent = userCoins.length;
+  const totalValue = userCoins.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+  document.getElementById('dash-value').textContent = '£' + totalValue.toLocaleString('en-GB');
+}
+
+function renderCollection() {
+  const search = (document.getElementById('coll-search')?.value || '').toLowerCase();
+  const activeFilter = document.querySelector('.filt .fc.on')?.dataset?.filter || 'all';
+  let coins = userCoins;
+  if (search) coins = coins.filter(c => (c.name||'').toLowerCase().includes(search) || (c.country||'').toLowerCase().includes(search));
+  if (activeFilter !== 'all') coins = coins.filter(c => c.status === activeFilter);
+  document.getElementById('coll-count').textContent = userCoins.length + ' coin' + (userCoins.length !== 1 ? 's' : '');
+  const grid = document.getElementById('coll-grid');
+  if (coins.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:40px 0;color:var(--text3)"><i class="ti ti-stack-2" style="font-size:36px;opacity:.3" aria-hidden="true"></i><p style="margin-top:10px;font-size:13px">' + (userCoins.length === 0 ? 'Your collection is empty.' : 'No coins match.') + '</p>' + (userCoins.length === 0 ? '<button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="go(\'add-coin\')"><i class="ti ti-plus"></i> Add your first coin</button>' : '') + '</div>';
+    return;
+  }
+  const statusBadge = { keep: '<span class="badge bk">Keep</span>', sale: '<span class="badge bs">For sale</span>', trade: '<span class="badge bt">Trade</span>' };
+  grid.innerHTML = coins.map((c, i) => `
+    <div class="ccoin" onclick="openCoin(${userCoins.indexOf(c)})">
+      <div class="cface">${c.emoji || '🪙'}</div>
+      <div class="cbody">
+        <div style="font-size:13px;font-weight:600;margin-bottom:3px">${esc(c.name)}</div>
+        <div style="font-size:11px;color:var(--text3)">${esc(c.country||'')}${c.year?' · '+c.year:''}${c.metal?' · '+c.metal:''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px">
+          ${statusBadge[c.status] || '<span class="badge bk">Keep</span>'}
+          <span style="font-size:12px;font-weight:600;color:var(--gold)">${c.value ? '£'+parseFloat(c.value).toLocaleString('en-GB') : '–'}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterCollection(el, filter) {
+  document.querySelectorAll('.filt .fc').forEach(f => f.classList.remove('on'));
+  el.classList.add('on');
+  el.dataset.filter = filter;
+  renderCollection();
+}
+
+function openCoin(index) {
+  currentCoinIndex = index;
+  const c = userCoins[index];
+  const coinEmojis = { Gold: '🪙', Silver: '🥈', Copper: '🟤', Bronze: '🟤', Nickel: '⚪' };
+  document.getElementById('cd-image').textContent = c.emoji || coinEmojis[c.metal] || '🪙';
+  document.getElementById('cd-name').textContent = c.name || '–';
+  document.getElementById('cd-sub').textContent = [c.country, c.year ? 'Year ' + c.year : null, c.metal].filter(Boolean).join(' · ');
+  document.getElementById('cd-value').textContent = c.value ? '£' + parseFloat(c.value).toLocaleString('en-GB') : '–';
+  const rows = [
+    ['Denomination', c.denomination], ['Metal', c.metal], ['Grade', c.grade],
+    ['Purchase price', c.purchase_price ? '£' + c.purchase_price : null],
+    ['Status', c.status], ['Notes', c.notes]
+  ].filter(r => r[1]);
+  document.getElementById('cd-table').innerHTML = rows.map(r => `<tr><td style="color:var(--text3);padding:5px 0">${r[0]}</td><td style="text-align:right">${esc(String(r[1]))}</td></tr>`).join('');
+  const statusBadge = { keep: '<span class="badge bk">Keep</span>', sale: '<span class="badge bs">For sale</span>', trade: '<span class="badge bt">For trade</span>' };
+  document.getElementById('cd-tags').innerHTML = (statusBadge[c.status] || '') + (c.metal ? `<span class="tag">${esc(c.metal)}</span>` : '') + (c.grade ? `<span class="tag">${esc(c.grade)}</span>` : '');
+  go('coin-detail');
+}
+
+async function deleteCoin() {
+  if (currentCoinIndex === null) return;
+  if (!confirm('Remove this coin from your collection?')) return;
+  const coin = userCoins[currentCoinIndex];
+  if (SUPABASE_CONFIGURED && coin.id) {
+    await supabase.from('coins').delete().eq('id', coin.id);
+  }
+  userCoins.splice(currentCoinIndex, 1);
+  currentCoinIndex = null;
+  renderCollection();
+  updateDashboard();
+  renderProfile();
+  go('collection');
+}
+
+async function saveCoin() {
+  const name = document.getElementById('f-name').value.trim();
+  const err = document.getElementById('add-coin-error');
+  if (!name) { showError(err, 'Please enter a coin name.'); return; }
+  err.style.display = 'none';
+  const btn = document.getElementById('save-coin-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const coinData = {
+    name,
+    country: document.getElementById('f-country').value.trim(),
+    year: document.getElementById('f-year').value || null,
+    denomination: document.getElementById('f-denom').value.trim(),
+    mint: document.getElementById('f-mint').value.trim(),
+    metal: document.getElementById('f-metal').value,
+    grade: document.getElementById('f-grade').value,
+    value: document.getElementById('f-value').value || null,
+    purchase_price: document.getElementById('f-purchase').value || null,
+    notes: document.getElementById('f-notes').value.trim(),
+    status: document.getElementById('f-status').value,
+    emoji: aiEmoji || '🪙',
+    user_id: currentUser?.id || 'demo'
+  };
+  if (SUPABASE_CONFIGURED && currentUser) {
+    const { data, error } = await supabase.from('coins').insert([coinData]).select();
+    if (error) { showError(err, error.message); btn.disabled = false; btn.innerHTML = 'Add to collection <i class="ti ti-check"></i>'; return; }
+    if (data) coinData.id = data[0].id;
+  }
+  userCoins.unshift(coinData);
+  renderCollection();
+  updateDashboard();
+  renderProfile();
+  btn.disabled = false;
+  btn.innerHTML = 'Add to collection <i class="ti ti-check"></i>';
+  // Reset form
+  ['f-name','f-country','f-year','f-denom','f-mint','f-notes','f-value','f-purchase'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ai-r').style.display = 'none';
+  aiEmoji = null;
+  go('coin-detail');
+  openCoin(0);
+}
+
+function renderProfile() {
+  const meta = currentUser?.user_metadata || {};
+  const username = meta.username || currentUser?.email?.split('@')[0] || 'Collector';
+  const initials = username.slice(0,2).toUpperCase();
+  document.getElementById('profile-username').textContent = username;
+  document.getElementById('profile-av').textContent = initials;
+  document.getElementById('profile-location').textContent = meta.location || 'Location not set';
+  document.getElementById('profile-coins').textContent = userCoins.length;
+  const grid = document.getElementById('profile-coll-grid');
+  if (userCoins.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 2;color:var(--text3);font-size:13px;padding:20px 0">No coins in collection yet.</div>';
+    return;
+  }
+  grid.innerHTML = userCoins.slice(0,6).map((c, i) => `
+    <div class="ccoin" onclick="openCoin(${i})">
+      <div class="cface">${c.emoji || '🪙'}</div>
+      <div class="cbody"><div style="font-size:13px;font-weight:600">${esc(c.name)}</div><div style="font-size:11px;color:var(--text3)">${esc(c.metal||'')}${c.grade?' · '+c.grade:''}</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// AI IDENTIFICATION
+// ═══════════════════════════════════════════════════════
+let aiEmoji = null;
+
+async function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const box = document.getElementById('ob-box');
+    box.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:7px" alt="Coin obverse">';
+    box.style.borderColor = 'var(--gold)';
+    box.style.padding = '0';
+    document.getElementById('ai-r').style.display = 'block';
+    document.getElementById('ai-name').textContent = 'Analysing...';
+    document.getElementById('ai-detail').textContent = '';
+    document.getElementById('ai-conf').textContent = '–';
+    document.getElementById('ai-bar').style.width = '0%';
+    const base64 = e.target.result.split(',')[1];
+    const mediaType = file.type || 'image/jpeg';
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+              { type: 'text', text: 'Identify this coin. Respond with ONLY valid JSON, no preamble: {"name":"full coin name","country":"2-letter ISO code","year":"year or range","metal":"Gold/Silver/Copper/Bronze/Nickel/Other","denomination":"denomination name","detail":"monarch and era e.g. George V","confidence":85}. If not a coin, set name to "Unknown" and confidence to 0.' }
+            ]
+          }]
+        })
+      });
+      const data = await resp.json();
+      const text = data.content?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      const coin = JSON.parse(clean);
+      document.getElementById('ai-name').textContent = coin.name || 'Unknown';
+      document.getElementById('ai-detail').textContent = [coin.metal, coin.detail].filter(Boolean).join(' · ');
+      document.getElementById('ai-conf').textContent = (coin.confidence || 0) + '%';
+      document.getElementById('ai-bar').style.width = (coin.confidence || 0) + '%';
+      aiEmoji = { Gold:'🪙', Silver:'🥈', Copper:'🟤', Bronze:'🟤', Nickel:'⚪' }[coin.metal] || '🪙';
+      window._aiCoin = coin;
+    } catch(err) {
+      document.getElementById('ai-name').textContent = 'Could not identify';
+      document.getElementById('ai-detail').textContent = 'Fill in details manually below';
+      document.getElementById('ai-conf').textContent = '–';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function acceptAI() {
+  const coin = window._aiCoin;
+  if (!coin) return;
+  if (coin.name) document.getElementById('f-name').value = coin.name;
+  if (coin.country) document.getElementById('f-country').value = coin.country;
+  if (coin.year) document.getElementById('f-year').value = coin.year;
+  if (coin.denomination) document.getElementById('f-denom').value = coin.denomination;
+  if (coin.metal) document.getElementById('f-metal').value = coin.metal;
+  const box = document.getElementById('ai-r');
+  box.style.background = 'rgba(76,175,125,0.08)';
+  box.style.borderColor = 'rgba(76,175,125,0.3)';
+}
+
+// ═══════════════════════════════════════════════════════
+// WISH LIST
+// ═══════════════════════════════════════════════════════
+function saveWishItem() {
+  const name = document.getElementById('w-name').value.trim();
+  if (!name) return;
+  const item = {
+    name,
+    country: document.getElementById('w-country').value.trim(),
+    year: document.getElementById('w-year').value,
+    budget: document.getElementById('w-budget').value,
+    grade: document.getElementById('w-grade').value,
+    id: Date.now()
+  };
+  wishList.push(item);
+  renderWishList();
+  closeModal('m-wish');
+  ['w-name','w-country','w-year','w-budget'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderWishList() {
+  const el = document.getElementById('wish-list-content');
+  if (wishList.length === 0) {
+    el.innerHTML = '<div class="disc">Your wish list is empty. Add coins you\'re looking for and you\'ll be matched automatically when a collector lists one.</div>';
+    return;
+  }
+  el.innerHTML = wishList.map(w => `
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:14px;font-weight:600">${esc(w.name)}</div>
+          <div style="font-size:11px;color:var(--text3)">${[w.country, w.year, w.budget?'Budget: £'+w.budget:null, w.grade].filter(Boolean).join(' · ')}</div>
+        </div>
+        <span class="badge bk">Watching</span>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+const NAV_SCREENS = ['dashboard','collection','marketplace','trade-hub','wishlist','feed','messages','profile'];
+const SHOW_FAB = ['collection'];
+const NAV_ITEMS = { dashboard:'dashboard', collection:'collection', marketplace:'marketplace', feed:'feed', profile:'profile' };
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById('s-' + id);
+  if (s) { s.classList.add('active'); s.scrollTop = 0; }
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  const ni = document.getElementById('ni-' + id);
+  if (ni) ni.classList.add('active');
+  const showNav = NAV_SCREENS.includes(id);
+  document.getElementById('bnav').classList.toggle('show', showNav);
+  document.getElementById('fab').classList.toggle('show', SHOW_FAB.includes(id));
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openThread() { document.getElementById('inbox').style.display='none'; document.getElementById('thread').style.display='block'; }
+function closeThread() { document.getElementById('thread').style.display='none'; document.getElementById('inbox').style.display='block'; }
+function stab(cid, idx, contentIds) {
+  document.getElementById(cid).querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('on', i===idx));
+  contentIds.forEach((id,i) => { const el = document.getElementById(id); if(el) el.style.display = i===idx?'block':'none'; });
+}
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target===bg) bg.classList.remove('open'); });
+});
+
+// Start on landing if no Supabase configured, otherwise auth check handles routing
+if (!SUPABASE_CONFIGURED) go('landing');
+</script>
+
+
+</body></html>
